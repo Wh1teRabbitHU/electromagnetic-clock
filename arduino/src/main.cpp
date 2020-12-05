@@ -15,9 +15,9 @@
 
 const uint8_t digitEnabledStates[4] = {
 	LOW,  // 1. Digit's enable state
-	HIGH,  // 2. Digit's enable state
+	LOW,  // 2. Digit's enable state
 	LOW,  // 3. Digit's enable state
-	LOW   // 4. Digit's enable state
+	HIGH   // 4. Digit's enable state
 };
 
 // Segment positions
@@ -132,7 +132,9 @@ void loop() {
 		currentValue = 0;
 	}
 
+	digitalWrite(PWR_EN_PIN, HIGH);
 	displayNumber(currentValue++);
+	digitalWrite(PWR_EN_PIN, LOW);
 
 	delay(1000);
 }
