@@ -22,6 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "essdisplay.h"
 
 /* USER CODE END Includes */
 
@@ -93,7 +94,9 @@ int main(void)
   MX_I2C1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-
+  ClockDisplay_Init();
+  ESSDisplay_powerOn();
+  uint16_t count = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -103,7 +106,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_GPIO_TogglePin(DIGIT_0_GPIO_Port, DIGIT_0_Pin);
+	  ESSDisplay_displayNumber(count);
+	  count++;
+
 	  HAL_Delay(1000);
   }
   /* USER CODE END 3 */
@@ -295,7 +300,46 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void ClockDisplay_Init(void) {
+	ESSDisplay_GPIO_t segSel0_GPIO = {0};
+	ESSDisplay_GPIO_t segSel1_GPIO = {0};
+	ESSDisplay_GPIO_t segSel2_GPIO = {0};
+	ESSDisplay_GPIO_t digitSel0_GPIO = {0};
+	ESSDisplay_GPIO_t digitSel1_GPIO = {0};
+	ESSDisplay_GPIO_t pwrEn_GPIO = {0};
+	ESSDisplay_GPIO_t ctrlEn_GPIO = {0};
+	ESSDisplay_GPIO_t clockVal_GPIO = {0};
 
+	segSel0_GPIO.port = SEG_0_GPIO_Port;
+	segSel0_GPIO.pin = SEG_0_Pin;
+	segSel1_GPIO.port = SEG_1_GPIO_Port;
+	segSel1_GPIO.pin = SEG_1_Pin;
+	segSel2_GPIO.port = SEG_2_GPIO_Port;
+	segSel2_GPIO.pin = SEG_2_Pin;
+	digitSel0_GPIO.port = DIGIT_0_GPIO_Port;
+	digitSel0_GPIO.pin = DIGIT_0_Pin;
+	digitSel1_GPIO.port = DIGIT_1_GPIO_Port;
+	digitSel1_GPIO.pin = DIGIT_1_Pin;
+	pwrEn_GPIO.port = PWR_EN_GPIO_Port;
+	pwrEn_GPIO.pin = PWR_EN_Pin;
+	ctrlEn_GPIO.port = CTRL_EN_GPIO_Port;
+	ctrlEn_GPIO.pin = CTRL_EN_Pin;
+	clockVal_GPIO.port = DISPLAY_VAL_GPIO_Port;
+	clockVal_GPIO.pin = DISPLAY_VAL_Pin;
+
+	ESSDisplay_conf_t * essdisplay_conf = {
+			&segSel0_GPIO,
+			&segSel1_GPIO,
+			&segSel2_GPIO,
+			&digitSel0_GPIO,
+			&digitSel1_GPIO,
+			&pwrEn_GPIO,
+			&ctrlEn_GPIO,
+			&clockVal_GPIO
+	};
+
+	ESSDisplay_init(essdisplay_conf);
+}
 /* USER CODE END 4 */
 
 /**
