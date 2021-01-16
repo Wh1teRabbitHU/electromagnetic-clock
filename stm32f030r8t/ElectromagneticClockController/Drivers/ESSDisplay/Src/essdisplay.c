@@ -29,11 +29,7 @@ static const uint8_t segmentValues[10] = {
 	0b1111101   // 9
 };
 
-static ESSDisplay_conf_t* conf;
-
-void ESSDisplay_writeGPIO(ESSDisplay_GPIO_t * gpio, uint8_t state) {
-
-}
+static ESSDisplay_conf_t conf;
 
 uint8_t ESSDisplay_getDigitValue(uint8_t digit, uint16_t number) {
 	while (digit-- > 0) {
@@ -61,8 +57,8 @@ void ESSDisplay_displayDigit(uint8_t digit, uint8_t value) {
 	uint8_t digitSelect0 = ESSDisplay_getValueFromBinary(digit, 0);
 	uint8_t digitSelect1 = ESSDisplay_getValueFromBinary(digit, 1);
 
-	ESSDisplay_writeGPIO(conf->digitSel0_GPIO, digitSelect0);
-	ESSDisplay_writeGPIO(conf->digitSel1_GPIO, digitSelect1);
+	HAL_GPIO_WritePin(&conf.digitSel0_GPIO_port, conf.digitSel0_GPIO_pin, digitSelect0);
+	HAL_GPIO_WritePin(&conf.digitSel1_GPIO_port, conf.digitSel1_GPIO_pin, digitSelect1);
 
 	for (uint8_t segmentIndex = 0; segmentIndex < SEGMENT_COUNT; segmentIndex++) {
 		uint8_t segmentSelect0 = ESSDisplay_getValueFromBinary(segmentIndex, 0);
@@ -71,13 +67,13 @@ void ESSDisplay_displayDigit(uint8_t digit, uint8_t value) {
 		uint8_t segmentEnabled = ESSDisplay_getValueFromBinary(segmentValues[value], segmentIndex);
 		uint8_t clockValue = ESSDisplay_getClockValue(digit, segmentEnabled);
 
-		ESSDisplay_writeGPIO(conf->segSel0_GPIO, segmentSelect0);
-		ESSDisplay_writeGPIO(conf->segSel1_GPIO, segmentSelect1);
-		ESSDisplay_writeGPIO(conf->segSel2_GPIO, segmentSelect2);
-		ESSDisplay_writeGPIO(conf->clockVal_GPIO, clockValue);
-		ESSDisplay_writeGPIO(conf->ctrlEn_GPIO, HIGH);
+		HAL_GPIO_WritePin(&conf.segSel0_GPIO_port, conf.segSel0_GPIO_pin, segmentSelect0);
+		HAL_GPIO_WritePin(&conf.segSel1_GPIO_port, conf.segSel1_GPIO_pin, segmentSelect1);
+		HAL_GPIO_WritePin(&conf.segSel2_GPIO_port, conf.segSel2_GPIO_pin, segmentSelect2);
+		HAL_GPIO_WritePin(&conf.clockVal_GPIO_port, conf.clockVal_GPIO_pin, clockValue);
+		HAL_GPIO_WritePin(&conf.ctrlEn_GPIO_port, conf.ctrlEn_GPIO_pin, HIGH);
 		HAL_Delay(1);
-		ESSDisplay_writeGPIO(conf->ctrlEn_GPIO, LOW);
+		HAL_GPIO_WritePin(&conf.ctrlEn_GPIO_port, conf.ctrlEn_GPIO_pin, LOW);
 		HAL_Delay(1);
 	}
 }
@@ -92,25 +88,32 @@ void ESSDisplay_displayNumber(uint16_t number) {
 	}
 }
 
+void ESSDisplay_displayTime(DCF77_dateTime_t * dateTime) {
+	uint8_t hours = dateTime->hours;
+	uint8_t minutes = dateTime->minutes;
+
+	ESSDisplay_displayDigit(3, hours / 10);
+	ESSDisplay_displayDigit(2, hours % 10);
+	ESSDisplay_displayDigit(1, minutes / 10);
+	ESSDisplay_displayDigit(0, minutes % 10);
+}
+
 void ESSDisplay_powerOn() {
-	ESSDisplay_writeGPIO(conf->pwrEn_GPIO, HIGH);
+	HAL_GPIO_WritePin(&conf.pwrEn_GPIO_port, conf.pwrEn_GPIO_pin, HIGH);
 }
 
 void ESSDisplay_powerOff() {
-	ESSDisplay_writeGPIO(conf->pwrEn_GPIO, LOW);
+	HAL_GPIO_WritePin(&conf.pwrEn_GPIO_port, conf.pwrEn_GPIO_pin, LOW);
 }
 
 void ESSDisplay_init(ESSDisplay_conf_t * essdisplay_conf) {
-	conf = essdisplay_conf;
+	conf = *essdisplay_conf;
 
-	ESSDisplay_writeGPIO(conf->digitSel0_GPIO, LOW);
-	ESSDisplay_writeGPIO(conf->digitSel1_GPIO, LOW);
-	ESSDisplay_writeGPIO(conf->pwrEn_GPIO, LOW);
-	ESSDisplay_writeGPIO(conf->ctrlEn_GPIO, LOW);
-	ESSDisplay_writeGPIO(conf->clockVal_GPIO, LOW);
-	ESSDisplay_writeGPIO(conf->segSel0_GPIO, LOW);
-	ESSDisplay_writeGPIO(conf->segSel1_GPIO, LOW);
-	ESSDisplay_writeGPIO(conf->segSel2_GPIO, LOW);
-
-	ESSDisplay_writeGPIO(conf->ctrlEn_GPIO, HIGH);
+	HAL_GPIO_WritePin(&conf.digitSel0_GPIO_port, conf.digitSel0_GPIO_pin, LOW);
+	HAL_GPIO_WritePin(&conf.digitSel1_GPIO_port, conf.digitSel1_GPIO_pin, LOW);
+	HAL_GPIO_WritePin(&conf.ctrlEn_GPIO_port, conf.ctrlEn_GPIO_pin, LOW);
+	HAL_GPIO_WritePin(&conf.clockVal_GPIO_port, conf.clockVal_GPIO_pin, LOW);
+	HAL_GPIO_WritePin(&conf.segSel0_GPIO_port, conf.segSel0_GPIO_pin, LOW);
+	HAL_GPIO_WritePin(&conf.segSel1_GPIO_port, conf.segSel1_GPIO_pin, LOW);
+	HAL_GPIO_WritePin(&conf.segSel2_GPIO_port, conf.segSel2_GPIO_pin, LOW);
 }
