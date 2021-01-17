@@ -88,10 +88,7 @@ void ESSDisplay_displayNumber(uint16_t number) {
 	}
 }
 
-void ESSDisplay_displayTime(DCF77_dateTime_t * dateTime) {
-	uint8_t hours = dateTime->hours;
-	uint8_t minutes = dateTime->minutes;
-
+void ESSDisplay_displayTime(uint8_t hours, uint8_t minutes) {
 	ESSDisplay_displayDigit(3, hours / 10);
 	ESSDisplay_displayDigit(2, hours % 10);
 	ESSDisplay_displayDigit(1, minutes / 10);

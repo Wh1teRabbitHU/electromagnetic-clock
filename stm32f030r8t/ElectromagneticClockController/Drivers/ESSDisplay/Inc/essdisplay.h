@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include "stm32f0xx_hal.h"
-#include "dcf77.h"
 
 #define LOW				0
 #define HIGH 			1
@@ -32,7 +31,7 @@ typedef struct ESSDisplay_conf_t {
 
 void ESSDisplay_displayDigit(uint8_t digit, uint8_t value);
 void ESSDisplay_displayNumber(uint16_t number);
-void ESSDisplay_displayTime(DCF77_dateTime_t * dateTime);
+void ESSDisplay_displayTime(uint8_t hours, uint8_t minutes);
 void ESSDisplay_powerOn();
 void ESSDisplay_powerOff();
 

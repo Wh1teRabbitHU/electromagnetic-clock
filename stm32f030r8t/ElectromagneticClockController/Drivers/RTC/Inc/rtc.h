@@ -11,10 +11,14 @@
 #include "dcf77.h"
 #include "essdisplay.h"
 
-void RTC_init(void);
-void RTC_update(DCF77_dateTime_t * dateTime);
+#define RTC_FORMAT_BCD 0x000000001U
+
+void RTC_init(RTC_HandleTypeDef * hrtc);
+void RTC_load();
+void RTC_save(DCF77_dateTime_t * dateTime);
+void RTC_updateDisplay();
 void RTC_checkTimeReceived(void);
-void RTC_handleInterrupt();
+void RTC_handleAlarmEvent(RTC_HandleTypeDef *hrtc);
 
 
 #endif /* RTC_INC_RTC_H_ */
