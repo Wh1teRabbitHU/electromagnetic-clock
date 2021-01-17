@@ -60,6 +60,7 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define DCF77_SIGNAL_Pin GPIO_PIN_3
 #define DCF77_SIGNAL_GPIO_Port GPIOA
+#define DCF77_SIGNAL_EXTI_IRQn EXTI2_3_IRQn
 #define DIGIT_0_Pin GPIO_PIN_7
 #define DIGIT_0_GPIO_Port GPIOC
 #define DIGIT_1_Pin GPIO_PIN_8

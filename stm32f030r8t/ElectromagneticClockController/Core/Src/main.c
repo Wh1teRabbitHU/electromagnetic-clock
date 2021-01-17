@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "essdisplay.h"
+#include "dcf77.h"
+#include "rtc.h"
 
 /* USER CODE END Includes */
 
@@ -55,7 +57,7 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
-void ClockDisplay_Init(void);
+void Display_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -94,9 +96,8 @@ int main(void)
   MX_I2C1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  ClockDisplay_Init();
-  uint16_t count = 0;
-  ESSDisplay_powerOn();
+  Display_Init();
+  RTC_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -106,10 +107,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  ESSDisplay_displayNumber(count);
-	  count++;
-
-	  HAL_Delay(200);
+	  RTC_checkTimeReceived();
+	  HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
@@ -273,8 +272,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : DCF77_SIGNAL_Pin */
   GPIO_InitStruct.Pin = DCF77_SIGNAL_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(DCF77_SIGNAL_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : DIGIT_0_Pin */
@@ -307,10 +306,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI2_3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
-void ClockDisplay_Init(void) {
+void Display_Init(void) {
 	ESSDisplay_conf_t essdisplay_conf = {0};
 
 	essdisplay_conf.segSel0_GPIO_port = *SEG_0_GPIO_Port;
