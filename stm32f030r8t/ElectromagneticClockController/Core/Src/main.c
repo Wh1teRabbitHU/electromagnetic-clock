@@ -96,9 +96,7 @@ int main(void)
   MX_I2C1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  Display_Init();
-  ESSDisplay_powerOn();
-  ESSDisplay_displayNumber(1234);
+  ESSDisplay_init();
   RTC_init(&hrtc);
   /* USER CODE END 2 */
 
@@ -110,7 +108,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  RTC_checkTimeReceived();
-	  HAL_Delay(10);
+	  HAL_Delay(50);
   }
   /* USER CODE END 3 */
 }
@@ -274,16 +272,16 @@ static void MX_RTC_Init(void)
   */
   sAlarm.AlarmTime.Hours = 0x0;
   sAlarm.AlarmTime.Minutes = 0x0;
-  sAlarm.AlarmTime.Seconds = 0x59;
+  sAlarm.AlarmTime.Seconds = 0x0;
   sAlarm.AlarmTime.SubSeconds = 0x0;
   sAlarm.AlarmTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
   sAlarm.AlarmTime.StoreOperation = RTC_STOREOPERATION_RESET;
-  sAlarm.AlarmMask = RTC_ALARMMASK_SECONDS;
+  sAlarm.AlarmMask = RTC_ALARMMASK_NONE;
   sAlarm.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_ALL;
   sAlarm.AlarmDateWeekDaySel = RTC_ALARMDATEWEEKDAYSEL_DATE;
   sAlarm.AlarmDateWeekDay = 0x1;
   sAlarm.Alarm = RTC_ALARM_A;
-  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, RTC_FORMAT_BCD) != HAL_OK)
+  if (HAL_RTC_SetAlarm(&hrtc, &sAlarm, RTC_FORMAT_BCD) != HAL_OK)
   {
     Error_Handler();
   }
@@ -309,10 +307,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, DIGIT_0_Pin|DIGIT_1_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(PWR_EN_GPIO_Port, PWR_EN_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, DIGIT_0_Pin|DIGIT_1_Pin|PWR_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, CTRL_EN_Pin|DISPLAY_VAL_Pin|SEG_0_Pin|SEG_1_Pin
@@ -324,26 +319,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(DCF77_SIGNAL_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : DIGIT_0_Pin */
-  GPIO_InitStruct.Pin = DIGIT_0_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(DIGIT_0_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : DIGIT_1_Pin */
-  GPIO_InitStruct.Pin = DIGIT_1_Pin;
+  /*Configure GPIO pins : DIGIT_0_Pin DIGIT_1_Pin PWR_EN_Pin */
+  GPIO_InitStruct.Pin = DIGIT_0_Pin|DIGIT_1_Pin|PWR_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(DIGIT_1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PWR_EN_Pin */
-  GPIO_InitStruct.Pin = PWR_EN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(PWR_EN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : CTRL_EN_Pin DISPLAY_VAL_Pin SEG_0_Pin SEG_1_Pin
                            SEG_2_Pin */
@@ -361,32 +342,11 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void Display_Init(void) {
-	ESSDisplay_conf_t essdisplay_conf = {0};
-
-	essdisplay_conf.segSel0_GPIO_port = *SEG_0_GPIO_Port;
-	essdisplay_conf.segSel0_GPIO_pin = SEG_0_Pin;
-	essdisplay_conf.segSel1_GPIO_port = *SEG_1_GPIO_Port;
-	essdisplay_conf.segSel1_GPIO_pin = SEG_1_Pin;
-	essdisplay_conf.segSel2_GPIO_port = *SEG_2_GPIO_Port;
-	essdisplay_conf.segSel2_GPIO_pin = SEG_2_Pin;
-	essdisplay_conf.digitSel0_GPIO_port = *DIGIT_0_GPIO_Port;
-	essdisplay_conf.digitSel0_GPIO_pin = DIGIT_0_Pin;
-	essdisplay_conf.digitSel1_GPIO_port = *DIGIT_1_GPIO_Port;
-	essdisplay_conf.digitSel1_GPIO_pin = DIGIT_1_Pin;
-	essdisplay_conf.pwrEn_GPIO_port = *PWR_EN_GPIO_Port;
-	essdisplay_conf.pwrEn_GPIO_pin = PWR_EN_Pin;
-	essdisplay_conf.ctrlEn_GPIO_port = *CTRL_EN_GPIO_Port;
-	essdisplay_conf.ctrlEn_GPIO_pin = CTRL_EN_Pin;
-	essdisplay_conf.clockVal_GPIO_port = *DISPLAY_VAL_GPIO_Port;
-	essdisplay_conf.clockVal_GPIO_pin = DISPLAY_VAL_Pin;
-
-	ESSDisplay_init(&essdisplay_conf);
-}
 
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc) {
 	RTC_handleAlarmEvent(hrtc);
 }
+
 /* USER CODE END 4 */
 
 /**
