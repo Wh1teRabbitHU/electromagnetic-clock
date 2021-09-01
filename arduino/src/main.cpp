@@ -1,23 +1,24 @@
 #include <Arduino.h>
 
-#define DIGIT_SEL_0_PIN 3
-#define DIGIT_SEL_1_PIN 4
-#define PWR_EN_PIN      5
-#define CTRL_EN_PIN     6
-#define CLOCK_VAL_PIN   7
-#define SEG_SEL_0_PIN   8
-#define SEG_SEL_1_PIN   9
-#define SEG_SEL_2_PIN   10
+#define DIGIT_SEL_0_PIN 5
+#define DIGIT_SEL_1_PIN 6
+#define PWR_EN_PIN      7
+#define CTRL_EN_PIN     8
+#define CLOCK_VAL_PIN   3
+#define SEG_SEL_0_PIN   2
+#define SEG_SEL_1_PIN   10
+#define SEG_SEL_2_PIN   9
 
 #define MAX_VALUE       9999
 #define DIGIT_COUNT     4
 #define SEGMENT_COUNT   7
+#define SET_INTERVAL    1
 
 const uint8_t digitEnabledStates[4] = {
 	LOW,  // 1. Digit's enable state
-	LOW,  // 2. Digit's enable state
+	HIGH,  // 2. Digit's enable state
 	LOW,  // 3. Digit's enable state
-	HIGH   // 4. Digit's enable state
+	LOW   // 4. Digit's enable state
 };
 
 // Segment positions
@@ -41,6 +42,13 @@ const uint8_t segmentValues[10] = {
 	0b1111111,  // 8
 	0b1111101   // 9
 };
+
+void setValue() {
+	digitalWrite(CTRL_EN_PIN, HIGH);
+	delay(SET_INTERVAL);
+	digitalWrite(CTRL_EN_PIN, LOW);
+	delay(SET_INTERVAL);
+}
 
 uint8_t getDigitValue(uint8_t digit, uint16_t number) {
 	while (digit-- > 0) {
@@ -81,10 +89,8 @@ void displayDigit(uint8_t digit, uint8_t value) {
 		digitalWrite(SEG_SEL_1_PIN, segmentSelect1);
 		digitalWrite(SEG_SEL_2_PIN, segmentSelect2);
 		digitalWrite(CLOCK_VAL_PIN, getClockValue(digit, segmentEnabled));
-		digitalWrite(CTRL_EN_PIN, HIGH);
-		delay(1);
-		digitalWrite(CTRL_EN_PIN, LOW);
-		delay(1);
+
+		setValue();
 	}
 }
 
@@ -99,6 +105,8 @@ void displayNumber(uint16_t number) {
 
 		delay(10);
 	}
+
+	Serial.println("");
 }
 
 void setup() {
@@ -122,19 +130,20 @@ void setup() {
 	pinMode(SEG_SEL_1_PIN, OUTPUT);
 	pinMode(SEG_SEL_2_PIN, OUTPUT);
 
-	digitalWrite(CTRL_EN_PIN, HIGH);
+	digitalWrite(CTRL_EN_PIN, LOW);
+	digitalWrite(PWR_EN_PIN, HIGH);
 }
 
 uint16_t currentValue = 0;
 
 void loop() {
-	if (currentValue == MAX_VALUE) {
+	if (currentValue > MAX_VALUE) {
 		currentValue = 0;
 	}
 
-	digitalWrite(PWR_EN_PIN, HIGH);
-	displayNumber(currentValue++);
-	digitalWrite(PWR_EN_PIN, LOW);
+	displayNumber(currentValue);
 
-	delay(1000);
+	currentValue += 1111;
+
+	delay(500);
 }

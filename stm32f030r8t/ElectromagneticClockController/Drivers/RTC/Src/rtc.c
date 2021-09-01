@@ -10,11 +10,11 @@ void RTC_init(RTC_HandleTypeDef * hrtc) {
 
 	__HAL_RTC_ALARM_ENABLE_IT(hrtc, RTC_IT_ALRA);
 
-	RTC_load();
+	RTC_loadIntoMemory();
 	DCF77_enable();
 }
 
-void RTC_load() {
+void RTC_loadIntoMemory() {
 	if (HAL_RTC_GetDate(&rtcHandle, &rtcDate, RTC_FORMAT_BCD) != HAL_OK) {
 		// TODO: Error_Handler();
 	}
@@ -25,7 +25,7 @@ void RTC_load() {
 	RTC_updateDisplay();
 }
 
-void RTC_save(DCF77_dateTime_t * dateTime) {
+void RTC_updateDateTime(DCF77_dateTime_t * dateTime) {
 	rtcDate.Year = dateTime->years;
 	rtcDate.Month = dateTime->months;
 	rtcDate.WeekDay = dateTime->dayOfWeek;
@@ -54,7 +54,7 @@ void RTC_checkTimeReceived() {
 
 		DCF77_dateTime_t * currentDateTime = DCF77_lastTimeValue();
 
-		RTC_save(currentDateTime);
+		RTC_updateDateTime(currentDateTime);
 
 		DCF77_disable();
 	}
@@ -63,7 +63,7 @@ void RTC_checkTimeReceived() {
 void RTC_handleAlarmEvent(RTC_HandleTypeDef *hrtc) {
 	rtcHandle = *hrtc;
 
-	RTC_load();
+	RTC_loadIntoMemory();
 
 	// Every hour we want to update the time using DCF77
 	if (rtcTime.Minutes == 0) {
