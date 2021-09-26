@@ -10,7 +10,7 @@ void setup() {
 	setupRTC();
 	initGPIO();
 
-	delay(2000);
+	delay(5000);
 }
 
 void loop() {
@@ -18,7 +18,7 @@ void loop() {
 		checkButtons();
 	}
 
-	if (loopCounter % 200 == 0) {
+	if (loopCounter % 100 == 0) {
 		checkTime();
 	}
 
